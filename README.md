@@ -2,6 +2,11 @@
 
 ![alt text](airdrop-demo.jpeg)
 
+0. Install deps
+
+```
+$ npm install
+```
 
 1. Setup admin address and private key in `config.yaml`
 
