@@ -1,0 +1,5 @@
+rpcURL: https://testnet-tezos.giganode.io
+adminAddress: tz1cqKSfxoBcyPboahA7tia3kT8qWLE1R5Wm
+adminKey: edskRkicbYtm1Ut1PiJPc7i4MwZ6BiXYPbpd5rrQyPS3H61w1KuLoB7vFQ3iw4pv9AikpPpy3fSH6AtVVkUPkvLbNE7bquLNvu
+tokenCodePath: Fishcake.tz
+airdropCodePath: FishcakeBox.tz

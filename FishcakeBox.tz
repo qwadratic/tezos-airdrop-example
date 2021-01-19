@@ -1,0 +1,82 @@
+parameter unit;
+storage   (pair (pair (nat %distributed) (set %receivers address)) (pair (nat %reward) (address %token)));
+code
+  {
+    CDR;        # @storage
+    # == redeem ==
+    # sp.verify(~ (self.data.receivers.contains(sp.sender))) # @storage
+    DUP;        # @storage : @storage
+    CADR;       # set address : @storage
+    SENDER;     # address : set address : @storage
+    MEM;        # bool : @storage
+    IF
+      {
+        PUSH string "WrongCondition: ~ (self.data.receivers.contains(sp.sender))"; # string : @storage
+        FAILWITH;   # FAILED
+      }
+      {}; # @storage
+    # sp.transfer(sp.list([sp.record(from_ = sp.self_address, txs = sp.list([sp.record(to_ = sp.sender, token_id = 0, amount = self.data.reward)]))]), sp.tez(0), sp.contract(sp.TList(sp.TRecord(from_ = sp.TAddress, txs = sp.TList(sp.TRecord(amount = sp.TNat, to_ = sp.TAddress, token_id = sp.TNat).layout(("to_", ("token_id", "amount"))))).layout(("from_", "txs"))), self.data.token, entry_point='transfer').open_some()) # @storage
+    DUP;        # @storage : @storage
+    CDDR;       # address : @storage
+    CONTRACT %transfer (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount)))))); # option (contract (list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))))) : @storage
+    IF_SOME
+      {}
+      {
+        PUSH int 24; # int : @storage
+        FAILWITH;   # FAILED
+      }; # @some : @storage
+    NIL operation; # list operation : @some : @storage
+    SWAP;       # @some : list operation : @storage
+    PUSH mutez 0; # mutez : @some : list operation : @storage
+    NIL (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))); # list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    NIL (pair (address %to_) (pair (nat %token_id) (nat %amount))); # list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    DIG 5;      # @storage : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation
+    DUP;        # @storage : @storage : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation
+    DUG 6;      # @storage : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    CDAR;       # nat : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    PUSH nat 0; # nat : nat : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    PAIR %token_id %amount; # pair (nat %token_id) (nat %amount) : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    SENDER;     # address : pair (nat %token_id) (nat %amount) : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    PAIR %to_;  # pair (address %to_) (pair (nat %token_id) (nat %amount)) : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    CONS;       # list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    SELF;       # contract unit : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    ADDRESS;    # address : list (pair (address %to_) (pair (nat %token_id) (nat %amount))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    PAIR %from_ %txs; # pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount)))) : list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    CONS;       # list (pair (address %from_) (list %txs (pair (address %to_) (pair (nat %token_id) (nat %amount))))) : mutez : @some : list operation : @storage
+    TRANSFER_TOKENS; # operation : list operation : @storage
+    CONS;       # list operation : @storage
+    SWAP;       # @storage : list operation
+    # self.data.distributed += self.data.reward # @storage : list operation
+    DUP;        # @storage : @storage : list operation
+    DUG 2;      # @storage : list operation : @storage
+    DUP;        # @storage : @storage : list operation : @storage
+    CDR;        # pair (nat %reward) (address %token) : @storage : list operation : @storage
+    SWAP;       # @storage : pair (nat %reward) (address %token) : list operation : @storage
+    CAR;        # pair (nat %distributed) (set %receivers address) : pair (nat %reward) (address %token) : list operation : @storage
+    DUP;        # pair (nat %distributed) (set %receivers address) : pair (nat %distributed) (set %receivers address) : pair (nat %reward) (address %token) : list operation : @storage
+    CDR;        # set address : pair (nat %distributed) (set %receivers address) : pair (nat %reward) (address %token) : list operation : @storage
+    SWAP;       # pair (nat %distributed) (set %receivers address) : set address : pair (nat %reward) (address %token) : list operation : @storage
+    CAR;        # nat : set address : pair (nat %reward) (address %token) : list operation : @storage
+    DIG 4;      # @storage : nat : set address : pair (nat %reward) (address %token) : list operation
+    CDAR;       # nat : nat : set address : pair (nat %reward) (address %token) : list operation
+    ADD;        # nat : set address : pair (nat %reward) (address %token) : list operation
+    PAIR;       # pair nat (set address) : pair (nat %reward) (address %token) : list operation
+    PAIR;       # pair (pair nat (set address)) (pair (nat %reward) (address %token)) : list operation
+    # self.data.receivers.add(sp.sender) # pair (pair nat (set address)) (pair (nat %reward) (address %token)) : list operation
+    DUP;        # pair (pair nat (set address)) (pair (nat %reward) (address %token)) : pair (pair nat (set address)) (pair (nat %reward) (address %token)) : list operation
+    CDR;        # pair (nat %reward) (address %token) : pair (pair nat (set address)) (pair (nat %reward) (address %token)) : list operation
+    SWAP;       # pair (pair nat (set address)) (pair (nat %reward) (address %token)) : pair (nat %reward) (address %token) : list operation
+    CAR;        # pair nat (set address) : pair (nat %reward) (address %token) : list operation
+    DUP;        # pair nat (set address) : pair nat (set address) : pair (nat %reward) (address %token) : list operation
+    CAR;        # nat : pair nat (set address) : pair (nat %reward) (address %token) : list operation
+    SWAP;       # pair nat (set address) : nat : pair (nat %reward) (address %token) : list operation
+    CDR;        # set address : nat : pair (nat %reward) (address %token) : list operation
+    PUSH bool True; # bool : set address : nat : pair (nat %reward) (address %token) : list operation
+    SENDER;     # address : bool : set address : nat : pair (nat %reward) (address %token) : list operation
+    UPDATE;     # set address : nat : pair (nat %reward) (address %token) : list operation
+    SWAP;       # nat : set address : pair (nat %reward) (address %token) : list operation
+    PAIR;       # pair nat (set address) : pair (nat %reward) (address %token) : list operation
+    PAIR;       # pair (pair nat (set address)) (pair (nat %reward) (address %token)) : list operation
+    SWAP;       # list operation : pair (pair nat (set address)) (pair (nat %reward) (address %token))
+    PAIR;       # pair (list operation) (pair (pair nat (set address)) (pair (nat %reward) (address %token)))
+  };
