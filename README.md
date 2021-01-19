@@ -1,5 +1,8 @@
 # tezos-airdrop-example
 
+![alt text](airdrop-demo.jpeg)
+
+
 1. Setup admin address and private key in `config.yaml`
 
 2. Prepare token and airdrop contracts
