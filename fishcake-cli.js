@@ -98,8 +98,7 @@ function redeem(airdropAddress, key) {
 			return tmpTezos.contract.at(airdropAddress)
 		})
 		.then((c) => {
-			// ??? fails
-			return c.methods.redeem().send()
+			return c.methods.redeem([[]]).send()
 		})
 		.then((op) => op.confirmation(1).then(() => true))
 		.then((confirmed) => {
@@ -122,10 +121,10 @@ function getRedeemed(airdropAddress) {
 function hasRedeemed(airdropAddress, address) {
 	Tezos.contract.at(airdropAddress)
 		.then((c) => {
-			return c.storage()
+			return c.views.hasRedeemed(address).read()
 		})
-		.then((storage) => {
-			console.log(storage['receivers'].includes(address))
+		.then((response) => {
+			console.log(response)
 		})
 		.catch((error) => console.log(`Error: ${JSON.stringify(error, null, 2)}`));
 }

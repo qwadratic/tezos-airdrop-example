@@ -9,16 +9,19 @@ class Fishcake(FA2.FA2):
         
         
 class FishcakeBox(sp.Contract):
-    def __init__(self, reward, token):
+    def __init__(self, reward, token, tokenAddress=None):
         self.token = token
+        if tokenAddress is None:
+            tokenAddress = self.token.address
+
         self.init(
             distributed = 0,
             reward = reward,
-            token = self.token.address,
+            token = tokenAddress,
             receivers = sp.set([]))
 
     @sp.entry_point
-    def redeem(self, params):
+    def redeem(self):
         sp.verify(~self.data.receivers.contains(sp.sender))
         
         token = sp.contract(
@@ -33,7 +36,10 @@ class FishcakeBox(sp.Contract):
         
         self.data.distributed += self.data.reward
         self.data.receivers.add(sp.sender)
-
+    
+    @sp.view(sp.TBool)
+    def hasRedeemed(self, address):
+        sp.result(self.data.receivers.contains(address))
 
 
 if "templates" not in __name__:
@@ -49,7 +55,8 @@ if "templates" not in __name__:
         scenario.show([admin, user1, user2])
         
         token = Fishcake(admin.address)
-        box = FishcakeBox(reward=5, token=token)
+        box = FishcakeBox(reward=5, token=token, tokenAddress=sp.address('KT1WVtyDPFzjMkdkihX22LR4y5ye9kGYxjvF'))
+
         scenario += token
         scenario += box
         
