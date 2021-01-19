@@ -104,7 +104,7 @@ function redeem(airdropAddress, key) {
 		.then((confirmed) => {
 			console.log(`Tokens redeemed to ${senderPKH}`)
 		})
-		.catch((error) => console.log(`Error: ${JSON.stringify(error, null, 2)}`));
+		.catch((error) => console.log(`Error: ${JSON.stringify(error.message, null, 2)}`));
 }
 
 function getRedeemed(airdropAddress) {
