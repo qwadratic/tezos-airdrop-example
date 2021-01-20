@@ -11,7 +11,7 @@ program
 	    'config.yaml');
 
 program
-	.command('prepare')
+	.command('prepare <supply>')
 	.description('deploy token and airdrop contracts + mint tokens to airdrop contract (`tokenCodePath` and `airdropCodePath` variables of config point to Michelson code)')
 	.action(prepare);
 
@@ -45,7 +45,7 @@ Tezos.setProvider({
 });
 
 
-function prepare() {
+function prepare(supply) {
 	let tokenAddress;
 	let airdropAddress;
 
@@ -75,7 +75,7 @@ function prepare() {
 			return Tezos.contract.at(tokenAddress)
 		})
 		.then((c) => {
-			return c.methods.mint(airdropAddress, 100000, 'FISH', 0).send()
+			return c.methods.mint(airdropAddress, parseInt(supply), 'FISH', 0).send()
 		})
 		.then((op) => op.confirmation(1).then(() => true))
 		.then((confirmed) => {
